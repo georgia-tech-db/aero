@@ -1,0 +1,311 @@
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import unittest
+from unittest.mock import MagicMock, patch
+
+from eva.binder.binder_utils import BinderError
+from eva.binder.statement_binder import StatementBinder
+from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import IndexType, NdArrayType
+from eva.parser.alias import Alias
+
+
+class StatementBinderTests(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def test_bind_tuple_value_expression(self):
+        with patch.object(StatementBinderContext, "get_binded_column") as mock:
+            mock.return_value = ["table_alias", "col_obj"]
+            binder = StatementBinder(StatementBinderContext())
+            tve = MagicMock()
+            tve.col_name = "col_name"
+            binder._bind_tuple_expr(tve)
+            col_alias = "{}.{}".format("table_alias", "col_name")
+            mock.assert_called_once()
+            self.assertEqual(tve.col_object, "col_obj")
+            self.assertEqual(tve.col_alias, col_alias)
+
+    @patch("eva.binder.statement_binder.bind_table_info")
+    def test_bind_tableref(self, mock_bind_tabe_info):
+        with patch.object(StatementBinderContext, "add_table_alias") as mock:
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = True
+            binder._bind_tableref(tableref)
+            mock.assert_called_with(
+                tableref.alias.alias_name, tableref.table.table_name
+            )
+            mock_bind_tabe_info.assert_called_once_with(tableref.table)
+
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            with patch.object(
+                StatementBinderContext, "add_derived_table_alias"
+            ) as mock_context:
+                binder = StatementBinder(StatementBinderContext())
+                tableref = MagicMock()
+                tableref.is_table_atom.return_value = False
+                tableref.is_select.return_value = True
+                binder._bind_tableref(tableref)
+                mock_context.assert_called_with(
+                    tableref.alias.alias_name,
+                    tableref.select_statement.target_list,
+                )
+                mock_binder.assert_called_with(tableref.select_statement)
+
+    def test_bind_tableref_with_func_expr(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_select.return_value = False
+            tableref.is_join.return_value = False
+            binder._bind_tableref(tableref)
+            mock_binder.assert_called_with(tableref.table_valued_expr.func_expr)
+
+    def test_bind_tableref_with_join(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_select.return_value = False
+            tableref.is_join.return_value = True
+            binder._bind_tableref(tableref)
+            mock_binder.assert_any_call(tableref.join_node.left)
+            mock_binder.assert_any_call(tableref.join_node.right)
+
+    def test_bind_tableref_should_raise(self):
+        with patch.object(StatementBinder, "bind"):
+            with self.assertRaises(BinderError):
+                binder = StatementBinder(StatementBinderContext())
+                tableref = MagicMock()
+                tableref.is_select.return_value = False
+                tableref.is_table_valued_expr.return_value = False
+                tableref.is_join.return_value = False
+                tableref.is_table_atom.return_value = False
+                binder._bind_tableref(tableref)
+
+    @patch("eva.binder.statement_binder.StatementBinderContext")
+    def test_bind_tableref_starts_new_context(self, mock_ctx):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_join.return_value = False
+            tableref.is_select.return_value = True
+            binder._bind_tableref(tableref)
+            self.assertEqual(mock_ctx.call_count, 1)
+
+    def test_bind_create_mat_statement(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            mat_statement = MagicMock()
+            binder._bind_create_mat_statement(mat_statement)
+            mock_binder.assert_called_with(mat_statement.query)
+
+    def test_bind_explain_statement(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            stmt = MagicMock()
+            binder._bind_explain_statement(stmt)
+            mock_binder.assert_called_with(stmt.explainable_stmt)
+
+    @patch("eva.binder.statement_binder.CatalogManager")
+    @patch("eva.binder.statement_binder.load_udf_class_from_file")
+    @patch("eva.binder.statement_binder.get_file_checksum")
+    def test_bind_func_expr(
+        self, mock_get_file_checksum, mock_load_udf_class_from_file, mock_catalog
+    ):
+        # setup
+        func_expr = MagicMock(
+            name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
+        )
+        func_expr.name.lower.return_value = "func_expr"
+        obj1 = MagicMock()
+        obj1.name.lower.return_value = "out1"
+        obj2 = MagicMock()
+        obj2.name.lower.return_value = "out2"
+        func_ouput_objs = [obj1, obj2]
+        udf_obj = MagicMock()
+        mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
+        mock_get_name.return_value = udf_obj
+
+        mock_get_udf_outputs = (
+            mock_catalog().get_udf_io_catalog_output_entries
+        ) = MagicMock()
+        mock_get_udf_outputs.return_value = func_ouput_objs
+        mock_load_udf_class_from_file.return_value.return_value = (
+            "load_udf_class_from_file"
+        )
+        mock_get_file_checksum.return_value = udf_obj.checksum
+
+        # Case 1 set output
+        func_expr.output = "out1"
+        binder = StatementBinder(StatementBinderContext())
+        binder._bind_func_expr(func_expr)
+
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        mock_get_name.assert_called_with(func_expr.name)
+        mock_get_udf_outputs.assert_called_with(udf_obj)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
+        self.assertEqual(func_expr.output_objs, [obj1])
+        print(str(func_expr.alias))
+        self.assertEqual(
+            func_expr.alias,
+            Alias("func_expr", ["out1"]),
+        )
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
+
+        # Case 2 output not set
+        func_expr.output = None
+        func_expr.alias = Alias("func_expr")
+        binder = StatementBinder(StatementBinderContext())
+        binder._bind_func_expr(func_expr)
+
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        mock_get_name.assert_called_with(func_expr.name)
+        mock_get_udf_outputs.assert_called_with(udf_obj)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
+        self.assertEqual(func_expr.output_objs, func_ouput_objs)
+        self.assertEqual(
+            func_expr.alias,
+            Alias(
+                "func_expr",
+                ["out1", "out2"],
+            ),
+        )
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
+
+        # Raise error if the class object cannot be created
+        mock_load_udf_class_from_file.reset_mock()
+        mock_error_msg = "mock_load_udf_class_from_file_error"
+        mock_load_udf_class_from_file.side_effect = MagicMock(
+            side_effect=RuntimeError(mock_error_msg)
+        )
+        binder = StatementBinder(StatementBinderContext())
+        with self.assertRaises(BinderError) as cm:
+            binder._bind_func_expr(func_expr)
+        err_msg = (
+            f"{mock_error_msg}. Please verify that the UDF class name in the"
+            "implementation file matches the UDF name."
+        )
+        self.assertEqual(str(cm.exception), err_msg)
+
+    @patch("eva.binder.statement_binder.check_table_object_is_video")
+    def test_bind_select_statement(self, is_video_mock):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            select_statement = MagicMock()
+            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+            select_statement.target_list = mocks[:2]
+            select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
+            select_statement.groupby_clause = mocks[4]
+            select_statement.groupby_clause.value = "8f"
+            binder._bind_select_statement(select_statement)
+            mock_binder.assert_any_call(select_statement.from_table)
+            mock_binder.assert_any_call(select_statement.where_clause)
+            mock_binder.assert_any_call(select_statement.groupby_clause)
+            mock_binder.assert_any_call(select_statement.union_link)
+            is_video_mock.assert_called()
+            for mock in mocks:
+                mock_binder.assert_any_call(mock)
+
+    @patch("eva.binder.statement_binder.StatementBinderContext")
+    def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            select_statement = MagicMock()
+            select_statement.union_link = None
+            select_statement.groupby_clause = None
+            binder._bind_select_statement(select_statement)
+            self.assertEqual(mock_ctx.call_count, 0)
+
+            binder = StatementBinder(StatementBinderContext())
+            select_statement = MagicMock()
+            select_statement.groupby_clause = None
+            binder._bind_select_statement(select_statement)
+            self.assertEqual(mock_ctx.call_count, 1)
+
+    def test_bind_unknown_object(self):
+        class UnknownType:
+            pass
+
+        with self.assertRaises(NotImplementedError):
+            binder = StatementBinder(StatementBinderContext())
+            binder.bind(UnknownType())
+
+    @patch("eva.binder.statement_binder.sys")
+    def test_bind_with_python37(self, mock_sys):
+        mock_sys.version_info = (3, 8)
+        with patch.object(StatementBinderContext, "get_binded_column") as mock:
+            mock.return_value = ["table_alias", "col_obj"]
+            binder = StatementBinder(StatementBinderContext())
+            tve = MagicMock()
+            tve.col_name = "col_name"
+            binder._bind_tuple_expr(tve)
+            col_alias = "{}.{}".format("table_alias", "col_name")
+            mock.assert_called_once()
+            self.assertEqual(tve.col_object, "col_obj")
+            self.assertEqual(tve.col_alias, col_alias)
+
+    def test_bind_create_index(self):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            create_index_statement = MagicMock()
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.col_list = ["foo"]
+            create_index_statement.index_type = "bar"
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            udf_obj = MagicMock()
+            output = MagicMock()
+            udf_obj.outputs = [output]
+
+            with patch.object(
+                CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
+            ):
+                create_index_statement.index_type = IndexType.HNSW
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_type = NdArrayType.FLOAT32
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_dimensions = [1, 100]
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.udf_func = None
+            col_def = MagicMock()
+            col_def.name = "a"
+            create_index_statement.col_list = [col_def]
+            col = MagicMock()
+            col.name = "a"
+            create_index_statement.table_ref.table.table_obj.columns = [col]
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_type = NdArrayType.FLOAT32
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_dimensions = [1, 10]
+            binder._bind_create_index_statement(create_index_statement)
