@@ -1,4 +1,4 @@
-# README for Availability and Reproducibility
+# Aero: Adaptive Query Processing of ML Queries
 
 We have created this archive for avilability and partial reproducibility. Most experiments can be run automatically but use case 4 will require some effort to set up properly.
 
