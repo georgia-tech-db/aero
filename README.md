@@ -6,13 +6,11 @@ We have included the scripts to generate the plots from raw data files but as th
 
 To run the experiments for use case 1, 2, 3, 5 as laid out in the paper, do the following.
 
-You must be on a machine running linux that has 2 NVida GPUs and has conda installed.
+You must be on a machine running linux that has NVidia GPUs and has conda installed.
 
 Before getting started, you must download the necessary videos and store them at `data/`. They can be found at https://drive.google.com/drive/folders/1Dpt2jzL3Libr2eKoEI71oSq06F-t3SUt
 
 ```sh
-# in case we are on a different branch
-$ git checkout artifacts-aubhro-2
 
 # newer versions of python have breaking changes
 $ conda create -n myenv python=3.9
