@@ -43,10 +43,7 @@ def load_dog_videos():
 
 
 @pytest.fixture(autouse=False)
-def setup_pytorch_tests():
-    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-
+def load_warehouse_videos():
     warehouse_video_path = f"{EVA_ROOT_DIR}/data/safety/factory.mp4"
     load_video_query = f"LOAD VIDEO '{warehouse_video_path}' INTO WarehouseVideo;"
     execute_query_fetch_all(load_video_query)
@@ -54,6 +51,12 @@ def setup_pytorch_tests():
     warehouse_video_path = f"{EVA_ROOT_DIR}/data/safety/factory-long-duplicate.mp4"
     load_video_query = f"LOAD VIDEO '{warehouse_video_path}' INTO LongWarehouseVideo;"
     execute_query_fetch_all(load_video_query)
+
+
+@pytest.fixture(autouse=False)
+def setup_pytorch_tests():
+    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
+    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
 
     execute_query_fetch_all("""CREATE TABLE IF NOT EXISTS FoodReview (rating INTEGER, review TEXT(10000));""")
     food_review_path = f"{EVA_ROOT_DIR}/data/food_reviews/normal.txt"

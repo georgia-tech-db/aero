@@ -31,7 +31,7 @@ USE_CASE_2_QUERY = """SELECT id FROM WarehouseVideo
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_2_baseline(benchmark, setup_pytorch_tests):
+def test_use_case_2_baseline(benchmark, load_warehouse_videos, setup_pytorch_tests):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", False)
@@ -62,7 +62,7 @@ def test_use_case_2_baseline(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_2_cache_aware_eddies(benchmark, load_warehouse_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -98,7 +98,7 @@ def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests, ray_fixtu
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_2_normal_eddies(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_2_normal_eddies(benchmark, load_warehouse_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
