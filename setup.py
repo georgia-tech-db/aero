@@ -64,6 +64,8 @@ test_libs = [
     "coveralls>=3.0.1",
     "flake8>=3.9.1",
     "moto[s3]>=4.1.1",
+    "mock",
+    "pynvml",
 ]
 
 notebook_libs = [
