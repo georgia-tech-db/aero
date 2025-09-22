@@ -26,8 +26,8 @@ from eva.server.command_handler import execute_query_fetch_all
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():
     CatalogManager().reset()
-    execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
+    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
+    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
 
     dog_video_path = f"{EVA_ROOT_DIR}/data/big-small-dog-play/big-small-dog-play-super-short.mp4"
     load_video_query = f"LOAD VIDEO '{dog_video_path}' INTO ShortBigSmallDogPlayVideo;"
