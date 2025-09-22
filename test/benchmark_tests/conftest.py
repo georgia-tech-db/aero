@@ -15,9 +15,11 @@
 from test.util import load_udfs_for_testing
 
 import pytest
+import ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -56,3 +58,9 @@ def setup_pytorch_tests():
     yield None
     
     execute_query_fetch_all("""DROP TABLE IF EXISTS FoodReview;""")
+
+def ray_fixture():
+    context = Context()
+    ray.init(num_gpus=len(context.gpus))
+    yield
+    ray.shutdown()

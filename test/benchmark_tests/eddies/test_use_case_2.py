@@ -14,10 +14,8 @@
 # limitations under the License.
 
 import pytest
-import ray
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -64,7 +62,7 @@ def test_use_case_2_baseline(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests):
+def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -74,9 +72,6 @@ def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "logical_get_to_sequential_scan_gpus", 1)
     config.update_value("experimental", "eddy_routing_policy", "AllCostCacheAware")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
-
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
 
     timer = Timer()
 
@@ -92,7 +87,6 @@ def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests):
     with timer:
         actual_batch = execute_query_fetch_all(USE_CASE_2_QUERY)
     
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
 
@@ -104,7 +98,7 @@ def test_use_case_2_cache_aware_eddies(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_2_normal_eddies(benchmark, setup_pytorch_tests):
+def test_use_case_2_normal_eddies(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -115,9 +109,6 @@ def test_use_case_2_normal_eddies(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_routing_policy", "AllCost")
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
-
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
 
     timer = Timer()
 
@@ -133,6 +124,5 @@ def test_use_case_2_normal_eddies(benchmark, setup_pytorch_tests):
     with timer:
         actual_batch = execute_query_fetch_all(USE_CASE_2_QUERY)
     
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))

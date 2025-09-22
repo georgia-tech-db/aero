@@ -14,10 +14,8 @@
 # limitations under the License.
 
 import pytest
-import ray
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -173,7 +171,7 @@ def test_use_case_1_best_reorder(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests):
+def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -187,17 +185,12 @@ def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
-
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
     timer = Timer()
     with timer:
         actual_batch = execute_query_fetch_all(get_query_based_on_config())
-    
-    ray.shutdown()
     
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
@@ -210,7 +203,7 @@ def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests):
+def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -224,9 +217,6 @@ def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_ranking_function", "Selectivity")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
-
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
@@ -234,7 +224,6 @@ def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests):
     with timer:
         actual_batch = execute_query_fetch_all(get_query_based_on_config())
         
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
 
@@ -246,7 +235,7 @@ def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests):
+def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -260,9 +249,6 @@ def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_ranking_function", "Score")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
-
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
@@ -270,7 +256,6 @@ def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests):
     with timer:
         actual_batch = execute_query_fetch_all(get_query_based_on_config())
     
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
 
@@ -282,7 +267,7 @@ def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_multi_gpu(benchmark, setup_pytorch_tests):
+def test_use_case_1_eddies_multi_gpu(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -292,9 +277,6 @@ def test_use_case_1_eddies_multi_gpu(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "logical_filter_to_physical_rule_gpus", 2)
     config.update_value("experimental", "logical_get_to_sequential_scan_workers", 2)
     config.update_value("experimental", "logical_get_to_sequential_scan_gpus", 1)
-
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
 
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])

@@ -14,10 +14,8 @@
 # limitations under the License.
 
 import pytest
-import ray
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -59,7 +57,7 @@ def test_use_case_4_baseline(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_4_eddies(benchmark, setup_pytorch_tests):
+def test_use_case_4_eddies(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -71,16 +69,12 @@ def test_use_case_4_eddies(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
-
     # Actual query execution.
     config.update_value("experimental", "eddy", True)
     timer = Timer()
     with timer:
         actual_batch = execute_query_fetch_all(USE_CASE_4_QUERY)
     
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
 
@@ -92,7 +86,7 @@ def test_use_case_4_eddies(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_4_balance_eddies(benchmark, setup_pytorch_tests):
+def test_use_case_4_balance_eddies(benchmark, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -104,15 +98,11 @@ def test_use_case_4_balance_eddies(benchmark, setup_pytorch_tests):
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyProxyBalance")
 
-    context = Context()
-    ray.init(num_gpus=len(context.gpus))
-
     # Actual query execution.
     config.update_value("experimental", "eddy", True)
     timer = Timer()
     with timer:
         actual_batch = execute_query_fetch_all(USE_CASE_4_QUERY)
         
-    ray.shutdown()
     print("Query time", timer.total_elapsed_time)
     print(len(actual_batch))
