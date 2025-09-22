@@ -196,7 +196,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
             )
 
         self.tot += perf_counter() - st
-        print(f"Yolo: {self.tot:.3f}")
+        # print(f"Yolo: {self.tot:.3f}")
 
         return pd.DataFrame(
             outcome,

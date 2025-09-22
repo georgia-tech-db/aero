@@ -22,10 +22,12 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
 
+@pytest.fixture(autouse=True)
+def reset_catalogue():
+    CatalogManager().reset()
 
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():
-    CatalogManager().reset()
     # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
 
@@ -59,6 +61,7 @@ def setup_pytorch_tests():
     
     execute_query_fetch_all("""DROP TABLE IF EXISTS FoodReview;""")
 
+@pytest.fixture(autouse=False)
 def ray_fixture():
     context = Context()
     ray.init(num_gpus=len(context.gpus))
