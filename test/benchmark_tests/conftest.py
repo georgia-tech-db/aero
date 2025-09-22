@@ -26,11 +26,9 @@ from eva.server.command_handler import execute_query_fetch_all
 def reset_catalogue():
     CatalogManager().reset()
 
-@pytest.fixture(autouse=False)
-def setup_pytorch_tests():
-    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
 
+@pytest.fixture(autouse=False)
+def load_dog_videos():
     dog_video_path = f"{EVA_ROOT_DIR}/data/big-small-dog-play/big-small-dog-play-super-short.mp4"
     load_video_query = f"LOAD VIDEO '{dog_video_path}' INTO ShortBigSmallDogPlayVideo;"
     execute_query_fetch_all(load_video_query)
@@ -42,6 +40,12 @@ def setup_pytorch_tests():
     dog_video_path = f"{EVA_ROOT_DIR}/data/big-small-dog-play/big-small-dog-play.mp4"
     load_video_query = f"LOAD VIDEO '{dog_video_path}' INTO BigSmallDogPlayVideoLong;"
     execute_query_fetch_all(load_video_query)
+
+
+@pytest.fixture(autouse=False)
+def setup_pytorch_tests():
+    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
+    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
 
     warehouse_video_path = f"{EVA_ROOT_DIR}/data/safety/factory.mp4"
     load_video_query = f"LOAD VIDEO '{warehouse_video_path}' INTO WarehouseVideo;"
@@ -60,6 +64,7 @@ def setup_pytorch_tests():
     yield None
     
     execute_query_fetch_all("""DROP TABLE IF EXISTS FoodReview;""")
+
 
 @pytest.fixture(autouse=False)
 def ray_fixture():

@@ -116,7 +116,7 @@ def get_query_based_on_config():
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_baseline(benchmark, setup_pytorch_tests):
+def test_use_case_1_baseline(benchmark, load_dog_videos, setup_pytorch_tests):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -140,7 +140,7 @@ def test_use_case_1_baseline(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_best_reorder(benchmark, setup_pytorch_tests):
+def test_use_case_1_best_reorder(benchmark, load_dog_videos, setup_pytorch_tests):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -171,7 +171,7 @@ def test_use_case_1_best_reorder(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_1_eddies_cost_driven(benchmark, load_dog_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -203,7 +203,7 @@ def test_use_case_1_eddies_cost_driven(benchmark, setup_pytorch_tests, ray_fixtu
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_1_eddies_selectivity_driven(benchmark, load_dog_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -235,7 +235,7 @@ def test_use_case_1_eddies_selectivity_driven(benchmark, setup_pytorch_tests, ra
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_1_eddies_score_driven(benchmark, load_dog_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
@@ -267,7 +267,7 @@ def test_use_case_1_eddies_score_driven(benchmark, setup_pytorch_tests, ray_fixt
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_1_eddies_multi_gpu(benchmark, setup_pytorch_tests, ray_fixture):
+def test_use_case_1_eddies_multi_gpu(benchmark, load_dog_videos, setup_pytorch_tests, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "query", QUERY)
