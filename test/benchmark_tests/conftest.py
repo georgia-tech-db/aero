@@ -52,21 +52,24 @@ def load_warehouse_videos():
     load_video_query = f"LOAD VIDEO '{warehouse_video_path}' INTO LongWarehouseVideo;"
     execute_query_fetch_all(load_video_query)
 
-
 @pytest.fixture(autouse=False)
-def setup_pytorch_tests():
-    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-
+def load_foodreview_text():
     execute_query_fetch_all("""CREATE TABLE IF NOT EXISTS FoodReview (rating INTEGER, review TEXT(10000));""")
     food_review_path = f"{EVA_ROOT_DIR}/data/food_reviews/normal.txt"
     load_csv_query = f"LOAD CSV '{food_review_path}' INTO FoodReview;" 
     execute_query_fetch_all(load_csv_query)
 
+    yield
+
+    execute_query_fetch_all("""DROP TABLE IF EXISTS FoodReview;""")
+
+
+@pytest.fixture(autouse=False)
+def setup_pytorch_tests():
+    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
+    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
     load_udfs_for_testing()
     yield None
-    
-    execute_query_fetch_all("""DROP TABLE IF EXISTS FoodReview;""")
 
 
 @pytest.fixture(autouse=False)
