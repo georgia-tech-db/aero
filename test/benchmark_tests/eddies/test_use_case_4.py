@@ -33,7 +33,7 @@ USE_CASE_4_QUERY = f"""SELECT * FROM FoodReview
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_4_baseline(benchmark, load_foodreview_text, setup_pytorch_tests):
+def test_use_case_4_baseline(benchmark, load_foodreview_text, load_llm_udf):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", False)
@@ -57,7 +57,7 @@ def test_use_case_4_baseline(benchmark, load_foodreview_text, setup_pytorch_test
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_4_eddies(benchmark, load_foodreview_text, setup_pytorch_tests, ray_fixture):
+def test_use_case_4_eddies(benchmark, load_foodreview_text, load_llm_udf, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)
@@ -86,7 +86,7 @@ def test_use_case_4_eddies(benchmark, load_foodreview_text, setup_pytorch_tests,
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_use_case_4_balance_eddies(benchmark, load_foodreview_text, setup_pytorch_tests, ray_fixture):
+def test_use_case_4_balance_eddies(benchmark, load_foodreview_text, load_llm_udf, ray_fixture):
     config = ConfigurationManager()
     config.update_value("core", "mode", "debug")
     config.update_value("experimental", "eddy", True)

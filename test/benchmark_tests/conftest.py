@@ -21,6 +21,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.execution_context import Context
 from eva.server.command_handler import execute_query_fetch_all
+from eva.udfs.udf_bootstrap_queries import init_builtin_video_udfs, init_llm_udf
 
 @pytest.fixture(autouse=True)
 def reset_catalogue():
@@ -65,11 +66,13 @@ def load_foodreview_text():
 
 
 @pytest.fixture(autouse=False)
-def setup_pytorch_tests():
-    # execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    # execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-    load_udfs_for_testing()
-    yield None
+def load_video_udfs():
+    init_builtin_video_udfs()
+
+
+@pytest.fixture(autouse=False)
+def load_llm_udf():
+    init_llm_udf()
 
 
 @pytest.fixture(autouse=False)

@@ -238,7 +238,7 @@ def init_builtin_udfs(mode="debug"):
         Dog_breed_udf_query,
         Scene_udf_query,
         Hard_hat_udf_query,
-        # LLM_udf_query,
+        LLM_udf_query,
         Area_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
@@ -257,6 +257,56 @@ def init_builtin_udfs(mode="debug"):
 
     if mode != "minimal":
         queries.extend([YoloV5_udf_query])
+
+    for query in queries:
+        execute_query_fetch_all(query)
+
+
+def init_builtin_video_udfs(mode="debug"):
+    """
+    Loads the builtin udfs into the system.
+    This should be called when the system bootstraps.
+    In debug mode, it also loads udfs used in the test suite.
+    Arguments:
+        mode (str): 'debug' or 'release'
+    """
+    queries = [
+        Fastrcnn_udf_query,
+        ArrayCount_udf_query,
+        Crop_udf_query,
+        Color_udf_query,
+        YoloV5_udf_query,
+        Dog_breed_udf_query,
+        Hard_hat_udf_query,
+        Area_udf_query
+    ]
+    if mode != "release":
+        queries.extend(
+            [
+                DummyObjectDetector_udf_query,
+                DummyMultiObjectDetector_udf_query,
+                DummyFeatureExtractor_udf_query,
+            ]
+        )
+
+    if mode != "minimal":
+        queries.extend([YoloV5_udf_query])
+
+    for query in queries:
+        execute_query_fetch_all(query)
+
+
+def init_llm_udf():
+    """
+    Loads the builtin udfs into the system.
+    This should be called when the system bootstraps.
+    In debug mode, it also loads udfs used in the test suite.
+    Arguments:
+        mode (str): 'debug' or 'release'
+    """
+    queries = [
+        LLM_udf_query,
+    ]
 
     for query in queries:
         execute_query_fetch_all(query)
