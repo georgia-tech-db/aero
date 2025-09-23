@@ -18,8 +18,18 @@ $ conda create -n myenv python=3.9
 $ conda activate myenv
 pip install -e ".[dev]"
 
-# query times will be printed out
-$ pytest -s test/benchmark_tests/eddies
-```
+# Use case 1
+$ pytest test/benchmark_tests/eddies/test_use_case_1.py
 
-Use case 4 is dependent on an LLM built on gpt4all which requires a new enough version of GLIBC.
+# Use case 2
+$ pytest test/benchmark_tests/eddies/test_use_case_2.py
+
+# Use case 3
+$ pytest test/benchmark_tests/eddies/test_use_case_3.py
+
+# Use case 4
+$ pytest test/benchmark_tests/eddies/test_use_case_4.py
+
+# Use case 5
+$ pytest test/benchmark_tests/eddies/test_use_case_5.py
+```
