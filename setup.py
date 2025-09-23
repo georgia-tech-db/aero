@@ -101,7 +101,7 @@ udf_libs = [
     "yolov5<=7.0.9",           # OBJECT DETECTION
     "ultralytics==8.3.196",
     "huggingface_hub",
-    "gpt4all==1.0.12",
+    "gpt4all==1.0.4",
     "thefuzz",                 # FUZZY STRING MATCHING
     "transformers==4.27.4"     # HUGGINGFACE
 ]

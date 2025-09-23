@@ -25,7 +25,7 @@ from eva.utils.logging_manager import logger
 
 class LLM(AbstractUDF):
     def setup(self):
-        self.model = GPT4All("orca-2-13b.Q4_0.gguf", n_threads=64, verbose=False)
+        self.model = GPT4All("orca-mini-7b.ggmlv3.q4_0", allow_download=True)
 
     @property
     def name(self):
