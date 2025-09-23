@@ -45,12 +45,7 @@ def test_use_case_3_baseline(benchmark, load_warehouse_videos, load_video_udfs):
     config.update_value("experimental", "logical_get_to_sequential_scan_workers", 1)
     config.update_value("experimental", "logical_get_to_sequential_scan_gpus", 1)
 
-    # Actual query execution.
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_3_QUERY)
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_3_QUERY)
 
 
 @pytest.mark.torchtest
@@ -72,11 +67,4 @@ def test_use_case_3_eddies(benchmark, load_warehouse_videos, load_video_udfs, ra
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyDynamicRoundRobin")
 
-    # Actual query execution.
-    config.update_value("experimental", "eddy", True)
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_3_QUERY)
-    
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_3_QUERY)

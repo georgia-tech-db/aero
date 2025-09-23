@@ -47,12 +47,7 @@ def test_use_case_2_baseline(benchmark, load_warehouse_videos, load_video_udfs):
     select_query = f"""SELECT id, HardHatDetector(data).labels FROM WarehouseVideo WHERE id > 8000 AND id < 14000;"""
     execute_query_fetch_all(select_query)
 
-    # Actual query execution.
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_2_QUERY)
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_2_QUERY)
 
 
 @pytest.mark.torchtest
@@ -73,8 +68,6 @@ def test_use_case_2_cache_aware_eddies(benchmark, load_warehouse_videos, load_vi
     config.update_value("experimental", "eddy_routing_policy", "AllCostCacheAware")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    timer = Timer()
-
     # Cache part of the query.
     config.update_value("experimental", "eddy", False)
     select_query = f"""SELECT id, YoloV5(data).labels FROM WarehouseVideo WHERE id > 1000 AND id < 7000;"""
@@ -83,12 +76,7 @@ def test_use_case_2_cache_aware_eddies(benchmark, load_warehouse_videos, load_vi
     execute_query_fetch_all(select_query)
 
     # Actual query execution.
-    config.update_value("experimental", "eddy", True)
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_2_QUERY)
-    
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_2_QUERY)
 
 
 @pytest.mark.torchtest
@@ -110,19 +98,11 @@ def test_use_case_2_normal_eddies(benchmark, load_warehouse_videos, load_video_u
     config.update_value("experimental", "eddy_ranking_function", "Cost")
     config.update_value("experimental", "laminar_routing_policy", "AnyRoundRobin")
 
-    timer = Timer()
-
     # Cache part of the query.
     config.update_value("experimental", "eddy", False)
     select_query = f"""SELECT id, YoloV5(data).labels FROM WarehouseVideo WHERE id > 1000 AND id < 7000;"""
     execute_query_fetch_all(select_query)
     select_query = f"""SELECT id, HardHatDetector(data).labels FROM WarehouseVideo WHERE id > 8000 AND id < 14000;"""
     execute_query_fetch_all(select_query)
-
-    # Actual query execution.
-    config.update_value("experimental", "eddy", True)
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_2_QUERY)
     
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_2_QUERY)

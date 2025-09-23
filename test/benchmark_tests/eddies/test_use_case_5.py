@@ -47,12 +47,7 @@ def test_use_case_5_baseline(benchmark, load_dog_videos, load_video_udfs):
 
     execute_query_fetch_all("""SELECT YoloV5(data) FROM BigSmallDogPlayVideo""")
 
-    # Actual query execution.
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_5_QUERY)
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_5_QUERY)
 
 
 @pytest.mark.torchtest
@@ -80,12 +75,4 @@ def test_use_case_5_hydro(benchmark, load_dog_videos, load_video_udfs, ray_fixtu
 
     execute_query_fetch_all("""SELECT YoloV5(data) FROM BigSmallDogPlayVideo""")
 
-    timer = Timer()
-
-    # Actual query execution.
-    config.update_value("experimental", "eddy", True)
-    with timer:
-        actual_batch = execute_query_fetch_all(USE_CASE_5_QUERY)
-    
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, USE_CASE_5_QUERY)
