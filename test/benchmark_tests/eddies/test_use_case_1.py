@@ -125,12 +125,8 @@ def test_use_case_1_baseline(benchmark, load_dog_videos, load_video_udfs):
 
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
-
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(get_query_based_on_config())
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    
+    benchmark(execute_query_fetch_all, get_query_based_on_config())
 
 
 @pytest.mark.torchtest
@@ -150,18 +146,14 @@ def test_use_case_1_best_reorder(benchmark, load_dog_videos, load_video_udfs):
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
-    timer = Timer()
-    with timer:
-        (
-            base_query,
-            dog_breed_pred,
-            dog_color_pred,
-        ) = get_query_and_predicate_based_on_config()
-        query = base_query + " AND {} AND {}".format(dog_color_pred, dog_breed_pred)
-        print(query)
-        actual_batch = execute_query_fetch_all(query)
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    (
+        base_query,
+        dog_breed_pred,
+        dog_color_pred,
+    ) = get_query_and_predicate_based_on_config()
+    query = base_query + " AND {} AND {}".format(dog_color_pred, dog_breed_pred)
+    
+    benchmark(execute_query_fetch_all, query)
 
 
 @pytest.mark.torchtest
@@ -188,12 +180,7 @@ def test_use_case_1_eddies_cost_driven(benchmark, load_dog_videos, load_video_ud
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(get_query_based_on_config())
-    
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, get_query_based_on_config())
 
 
 @pytest.mark.torchtest
@@ -220,12 +207,7 @@ def test_use_case_1_eddies_selectivity_driven(benchmark, load_dog_videos, load_v
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(get_query_based_on_config())
-        
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, get_query_based_on_config())
 
 
 @pytest.mark.torchtest
@@ -252,12 +234,7 @@ def test_use_case_1_eddies_score_driven(benchmark, load_dog_videos, load_video_u
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
 
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(get_query_based_on_config())
-    
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    benchmark(execute_query_fetch_all, get_query_based_on_config())
 
 
 @pytest.mark.torchtest
@@ -280,9 +257,5 @@ def test_use_case_1_eddies_multi_gpu(benchmark, load_dog_videos, load_video_udfs
 
     if config.get_value("experimental", "cache"):
         execute_query_fetch_all(get_query_and_predicate_based_on_config()[0])
-
-    timer = Timer()
-    with timer:
-        actual_batch = execute_query_fetch_all(get_query_based_on_config())
-    print("Query time", timer.total_elapsed_time)
-    print(len(actual_batch))
+    
+    benchmark(execute_query_fetch_all, get_query_based_on_config())
