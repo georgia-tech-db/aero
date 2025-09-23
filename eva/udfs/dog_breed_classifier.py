@@ -58,6 +58,6 @@ class DogBreedClassifier(AbstractClassifierUDF):
 
         self.tot += perf_counter() - st
         self.count += len(df)
-        print(f"Breed Cost: {self.tot:.3f}, Breed #data proceesed: {self.count}")
+        # print(f"Breed Cost: {self.tot:.3f}, Breed #data proceesed: {self.count}")
 
         return outcome

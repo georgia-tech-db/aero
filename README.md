@@ -22,4 +22,4 @@ pip install -e ".[dev]"
 $ pytest -s test/benchmark_tests/eddies
 ```
 
-If you want to run use case 4, you must be on a version of linux with a new enough version of GLIBC and uncomment line 241 in `udf_bootstrap_queries.py`.
+Use case 4 is dependent on an LLM built on gpt4all which requires a new enough version of GLIBC.
