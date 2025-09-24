@@ -1,6 +1,6 @@
 # Aero: Adaptive Query Processing of ML Queries
 
-We have created this archive for avilability and partial reproducibility. Most experiments can be run automatically but use case 4 will require some effort to set up properly.
+We have created this archive for availability and partial reproducibility. Most experiments can be run automatically but use case 4 will require some effort to set up properly.
 
 We have included the scripts to generate the plots from raw data files but as they were gathered manually, reproducing the data files from experimental outputs will require manual work.
 
@@ -32,4 +32,10 @@ $ pytest test/benchmark_tests/eddies/test_use_case_4.py
 
 # Use case 5
 $ pytest test/benchmark_tests/eddies/test_use_case_5.py
+```
+
+## Benchmark
+In order to save experiments, run the following command.
+```ssh
+$ pytest test/benchmark_tests/eddies --benchmark-save-data
 ```
